@@ -1,4 +1,4 @@
-import { API_BASE_URL, TIMEOUTS } from '../constants/index.js';
+import { API_BASE_URL, TIMEOUTS } from '../constants/index.jsx';
 import { getAuthorizationHeader } from '../utils/tokenManager.js';
 
 /**
