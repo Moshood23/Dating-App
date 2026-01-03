@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -22,7 +22,6 @@ const Login = () => {
       return;
     }
 
-    // Mock login - replace with actual API call
     login({ email, name: email.split('@')[0] });
     navigate('/');
   };
