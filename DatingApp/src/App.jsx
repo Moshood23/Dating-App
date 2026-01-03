@@ -1,21 +1,41 @@
 import React from 'react';
-import { AuthProvider } from './context/AuthContext.jsx';
-import ErrorBoundary from './components/ErrorBoundary.jsx';
-import AppRouter from './router.jsx';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import Home from './pages/Home.jsx';
+import Profile from './pages/Profile.jsx';
+import Matches from './pages/Matches.jsx';
+import Chat from './pages/Chat.jsx';
 
-/**
- * Main App Component
- * Provides authentication context and error boundary
- * Wraps entire application with necessary providers
- */
-function App() {
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
+
+function AppContent() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <AppRouter />
-      </AuthProvider>
-    </ErrorBoundary>
+    <Router>
+      {isAuthenticated && <Navbar />}
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/matches" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+      </Routes>
+    </Router>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}

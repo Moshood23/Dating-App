@@ -1,158 +1,127 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { useForm } from '../hooks/useForm';
-import { validateLoginForm } from '../utils/validation';
-import { ROUTES } from '../constants';
-import Input from '../components/Input';
-import Button from '../components/Button';
+import { useAuth } from '../context/AuthContext';
 
-/**
- * Login Page
- * Allows existing users to log in with email and password
- */
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const { login, error: authError, success: authSuccess } = useAuth();
-  const [apiError, setApiError] = useState('');
 
-  // Initialize form with useForm hook
-  const form = useForm(
-    { email: '', password: '' },
-    async (values) => {
-      try {
-        setApiError('');
-        await login(values.email, values.password);
-        // Redirect to home on successful login
-        navigate(ROUTES.HOME);
-      } catch (err) {
-        setApiError(err.message || 'Login failed. Please try again.');
-      }
-    },
-    validateLoginForm
-  );
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
 
-  const { getFieldProps, getFieldMeta, handleSubmit, isSubmitting } = form;
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError('Please enter a valid email');
+      return;
+    }
+
+    // Mock login - replace with actual API call
+    login({ email, name: email.split('@')[0] });
+    navigate('/');
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-white px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-blue-600 mb-2">
-            DatingApp
-          </h1>
-          <p className="text-gray-600">
-            Find your perfect match
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Welcome Back
-          </h2>
-
-          {/* Error Messages */}
-          {(authError || apiError) && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-              <p className="text-sm">{authError || apiError}</p>
-            </div>
-          )}
-
-          {/* Success Message */}
-          {authSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
-              <p className="text-sm">{authSuccess}</p>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Input */}
-            <Input
-              label="Email Address"
-              type="email"
-              placeholder="you@example.com"
-              {...getFieldProps('email')}
-              error={getFieldMeta('email').error}
-              touched={getFieldMeta('email').touched}
-              required
-            />
-
-            {/* Password Input */}
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              {...getFieldProps('password')}
-              error={getFieldMeta('password').error}
-              touched={getFieldMeta('password').touched}
-              required
-            />
-
-            {/* Forgot Password Link */}
-            <div className="text-right">
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 transition-colors"
-              >
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              loading={isSubmitting}
-              disabled={isSubmitting}
-              className="w-full"
-            >
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                Don't have an account?
-              </span>
-            </div>
-          </div>
-
-          {/* Register Link */}
-          <Link to={ROUTES.REGISTER}>
-            <Button
-              type="button"
-              variant="secondary"
-              size="md"
-              className="w-full"
-            >
-              Create Account
-            </Button>
-          </Link>
-        </div>
-
-        {/* Footer */}
-        <p className="text-center text-sm text-gray-600">
-          By signing in, you agree to our{' '}
-          <a href="#" className="text-blue-600 hover:text-blue-700">
-            Terms of Service
-          </a>
-          {' '}and{' '}
-          <a href="#" className="text-blue-600 hover:text-blue-700">
-            Privacy Policy
-          </a>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Welcome Back 💕</h1>
+        <form onSubmit={handleSubmit}>
+          {error && <div style={styles.error}>{error}</div>}
+          
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={styles.input}
+          />
+          
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={styles.input}
+          />
+          
+          <button type="submit" style={styles.button}>Login</button>
+        </form>
+        
+        <p style={styles.link}>
+          Don't have an account? <Link to="/register" style={styles.linkColor}>Register here</Link>
         </p>
       </div>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+    backgroundColor: '#f5f5f5',
+  },
+  card: {
+    backgroundColor: 'white',
+    borderRadius: '10px',
+    padding: '40px',
+    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+    width: '100%',
+    maxWidth: '400px',
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: '30px',
+    fontSize: '28px',
+    color: '#333',
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    marginBottom: '15px',
+    border: '1px solid #ddd',
+    borderRadius: '5px',
+    fontSize: '16px',
+    boxSizing: 'border-box',
+  },
+  button: {
+    width: '100%',
+    padding: '12px',
+    backgroundColor: '#ff6b9d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    marginTop: '10px',
+  },
+  error: {
+    backgroundColor: '#fee',
+    color: '#c33',
+    padding: '10px',
+    borderRadius: '5px',
+    marginBottom: '15px',
+    textAlign: 'center',
+  },
+  link: {
+    textAlign: 'center',
+    marginTop: '20px',
+    fontSize: '14px',
+  },
+  linkColor: {
+    color: '#ff6b9d',
+    textDecoration: 'none',
+    fontWeight: 'bold',
+  },
 };
 
 export default Login;
